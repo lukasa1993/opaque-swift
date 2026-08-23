@@ -1,0 +1,4 @@
+module COpaque {
+    header "opaque_swift.h"
+    export *
+}
