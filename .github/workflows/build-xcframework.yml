@@ -10,10 +10,23 @@ on:
       - "Package.swift"
       - "scripts/build-xcframework.sh"
       - ".github/workflows/build-xcframework.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Rust/**"
+      - "Sources/**"
+      - "Tests/**"
+      - "Package.swift"
+      - "scripts/build-xcframework.sh"
+      - ".github/workflows/build-xcframework.yml"
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: opaque-swift-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -35,6 +48,7 @@ jobs:
         run: swift test
 
       - name: Commit generated binary
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
