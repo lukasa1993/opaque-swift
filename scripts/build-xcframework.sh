@@ -8,6 +8,10 @@ ARTIFACT_DIR="$ROOT/Artifacts"
 XCFRAMEWORK="$ARTIFACT_DIR/COpaque.xcframework"
 BUILD_DIR="$ROOT/.build/opaque-rust"
 LIB_NAME="libopaque_swift_ffi.a"
+SIM_DIR="$BUILD_DIR/ios-simulator"
+MAC_DIR="$BUILD_DIR/macos"
+SIM_LIB="$SIM_DIR/$LIB_NAME"
+MAC_LIB="$MAC_DIR/$LIB_NAME"
 
 TARGETS=(
   aarch64-apple-ios
@@ -27,24 +31,24 @@ for target in "${TARGETS[@]}"; do
 done
 
 rm -rf "$BUILD_DIR" "$XCFRAMEWORK"
-mkdir -p "$BUILD_DIR" "$ARTIFACT_DIR"
+mkdir -p "$SIM_DIR" "$MAC_DIR" "$ARTIFACT_DIR"
 
 lipo -create \
   "$TARGET_DIR/aarch64-apple-ios-sim/release/$LIB_NAME" \
   "$TARGET_DIR/x86_64-apple-ios/release/$LIB_NAME" \
-  -output "$BUILD_DIR/$LIB_NAME-ios-simulator"
+  -output "$SIM_LIB"
 
 lipo -create \
   "$TARGET_DIR/aarch64-apple-darwin/release/$LIB_NAME" \
   "$TARGET_DIR/x86_64-apple-darwin/release/$LIB_NAME" \
-  -output "$BUILD_DIR/$LIB_NAME-macos"
+  -output "$MAC_LIB"
 
 xcodebuild -create-xcframework \
   -library "$TARGET_DIR/aarch64-apple-ios/release/$LIB_NAME" \
   -headers "$ROOT/Rust/include" \
-  -library "$BUILD_DIR/$LIB_NAME-ios-simulator" \
+  -library "$SIM_LIB" \
   -headers "$ROOT/Rust/include" \
-  -library "$BUILD_DIR/$LIB_NAME-macos" \
+  -library "$MAC_LIB" \
   -headers "$ROOT/Rust/include" \
   -output "$XCFRAMEWORK"
 
